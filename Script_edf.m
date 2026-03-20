@@ -1,10 +1,12 @@
-%% New script EEG
+%% EEG Muse Anthena S Script
+% .edf files processing
+% Diego Garrido Cerpa - Viña del Mar 2025
 
-% Limpiar entorno
+% Clean Workspace
 close all;
 clear all; clc
 
-% Abrir carpeta
+% Main Folder
 cfg = []; 
 cfg.dir = ['C:\Users\yangy\Desktop\Muse_EEG\Ed Fisica']; 
 
@@ -51,26 +53,24 @@ EEG  = pop_basicfilter( EEG,  1:4 , 'Boundary', 'boundary', 'Cutoff', [ 1 35], '
 eeglab redraw; 
 
 % %% Cut Data
-% % Función para cortar datos por ventanas de tiempo
-% % Agregar después del filtrado y antes de "Clean Data"
+% % Function to cut data for time window 
 % 
-% % Definir ventana de tiempo (formato MM:SS o HH:MM:SS)
+% % Define time window (format MM:SS o HH:MM:SS) 
 % tiempo_inicio = '04:10';
 % tiempo_fin = '04:51';
 % 
-% % Función para convertir tiempo a segundos
+% % Function to transform time to seconds
 % time2sec = @(timestr) sum(cellfun(@str2double, strsplit(timestr, ':')) .* [60, 1]);
 % 
-% % Convertir tiempos a segundos
 % inicio_seg = time2sec(tiempo_inicio);
 % fin_seg = time2sec(tiempo_fin);
 % 
-% % Convertir segundos a frames (samples)
-% fs = EEG.srate;  % Tasa de muestreo (debería ser 256 Hz después del resample)
-% inicio_frame = round(inicio_seg * fs) + 1;  % +1 porque MATLAB indexa desde 1
+% % Transform seconds to frames
+% fs = EEG.srate;  % Sampling Rate (should be 256Hz)
+% inicio_frame = round(inicio_seg * fs) + 1;  % +1 because MATLAB index from 1
 % fin_frame = round(fin_seg * fs);
 % 
-% % Verificar que los índices estén dentro del rango
+% % Verify time index
 % if inicio_frame < 1
 %     inicio_frame = 1;
 % end
@@ -79,7 +79,7 @@ eeglab redraw;
 %     warning('El tiempo final excede la duración del registro. Se ajustó al final del archivo.');
 % end
 % 
-% % Cortar los datos
+% % Cut data
 % EEG = pop_select(EEG, 'point', [inicio_frame fin_frame]);
 % eeglab redraw;
 

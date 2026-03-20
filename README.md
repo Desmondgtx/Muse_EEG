@@ -1,173 +1,172 @@
 # Muse\_EEG
 
-Pipeline de preprocesamiento y análisis espectral de datos EEG registrados con **MUSE Athena S**, utilizando EEGLAB (MATLAB) y R.
+Preprocessing and spectral analysis pipeline for EEG data recorded with **MUSE Athena S**, using EEGLAB (MATLAB) and R.
 
-## Descripción del estudio
+## Study Description
 
-Se registró actividad EEG de 8 participantes (IDs: 01, 02, 03, 05, 06, 07, 08, 09) durante 9 tareas experimentales:
+EEG activity was recorded from 8 participants (IDs: 01, 02, 03, 05, 06, 07, 08, 09) during 9 experimental tasks:
 
-|Tarea|Descripción|
+| Task | Description |
 |-|-|
-|**Basal**|Estado resting (línea base)|
-|**Documental**|Visualización de un documental|
-|**Leer**|Lectura de un texto|
-|**Música**|Escuchar piezas musicales|
-|**Podcast**|Escuchar un podcast|
-|**Reality**|Visualización de un reality|
-|**Tetris**|Jugar al Tetris|
-|**Tiktok**|Visualización de TikTok|
-|**Maximal**|Tarea N-Back de memoria a corto plazo|
+| **Basal** | Resting state (baseline) |
+| **Documental** | Watching a documentary |
+| **Leer** | Reading a text |
+| **Música** | Listening to music pieces |
+| **Podcast** | Listening to a podcast |
+| **Reality** | Watching a reality show |
+| **Tetris** | Playing Tetris |
+| **Tiktok** | Watching TikTok |
+| **Maximal** | N-Back short-term memory task |
 
-El dispositivo MUSE Athena S registra 4 canales EEG correspondientes a las posiciones del sistema 10-20:
+The MUSE Athena S device records 4 EEG channels corresponding to the 10-20 system positions:
 
-* **TP9** – Temporal izquierdo
-* **AF7** – Frontal izquierdo
-* **AF8** – Frontal derecho
-* **TP10** – Temporal derecho
+* **TP9** – Left temporal
+* **AF7** – Left frontal
+* **AF8** – Right frontal
+* **TP10** – Right temporal
 
-\---
+---
 
-## Estructura del repositorio
+## Repository Structure
 
 ```
 Muse\_EEG/
 │
-├── Script\_csv.m          # Preprocesamiento principal (archivos .csv)
-├── Script\_edf.m          # Preprocesamiento alternativo (archivos .edf)
-├── Spectra.m             # Extracción de datos espectrales desde EEGLAB
-├── analisis\_ratio.R      # Análisis de ratios Theta/Alpha y Alpha/Theta
+├── Script\_csv.m          # Main preprocessing (from .csv files)
+├── Script\_edf.m          # Alternative preprocessing (from .edf files)
+├── Spectra.m             # Spectral data extraction from EEGLAB
+├── analisis\_ratio.R      # Theta/Alpha and Alpha/Theta ratio analysis
 │
-├── Participantes/        # Archivos EEG crudos organizados por participante
-├── Datos/                # Archivos EEG crudos organizados por tarea
-├── Datos Filtrados/      # Archivos .set resultantes del preprocesamiento
-└── Spectra/              # Proyecto RStudio con los CSVs de datos espectrales
+├── Participantes/        # Raw EEG files organized by participant
+├── Datos/                # Raw EEG files organized by task
+├── Datos Filtrados/      # Preprocessed .set files
+└── Spectra/              # RStudio project with spectral data CSVs
 ```
 
-\---
+---
 
-## Requisitos
+## Requirements
 
 ### MATLAB
 
-* [EEGLAB](https://sccn.ucsd.edu/eeglab/) (con los plugins incluidos)
-* Plugin **Muse Monitor Import** (`pop\_musemonitor`) para importar archivos .csv del MUSE
-* Plugin **BIOSIG** (`pop\_biosig`) para importar archivos .edf
-* Plugin **ERPLAB** (`pop\_basicfilter`) — requerido únicamente por `Script\_edf.m`
-* Plugin **clean\_rawdata** (`pop\_clean\_rawdata`)
+* [EEGLAB](https://sccn.ucsd.edu/eeglab/) (with included plugins)
+* **Muse Monitor Import** plugin (`pop\_musemonitor`) for importing MUSE .csv files
+* **BIOSIG** plugin (`pop\_biosig`) for importing .edf files
+* **ERPLAB** plugin (`pop\_basicfilter`) — required only by `Script\_edf.m`
+* **clean\_rawdata** plugin (`pop\_clean\_rawdata`)
 
 ### R
 
-* Paquete `dplyr`
+* `dplyr` package
 
-\---
+---
 
-## Guía de uso
+## Usage Guide
 
-### 1\. Preprocesamiento con `Script\_csv.m` (flujo principal)
+### 1\. Preprocessing with `Script\_csv.m` (main workflow)
 
-Este es el script principal para preprocesar los datos del MUSE Athena S. Utiliza los archivos `.csv` exportados desde la app Muse Monitor.
+This is the main script for preprocessing MUSE Athena S data. It uses `.csv` files exported from the Muse Monitor app.
 
-**Pasos del pipeline:**
+**Pipeline steps:**
 
-1. **Importar datos** — Carga el archivo `.csv` con `pop\_musemonitor` a una frecuencia de muestreo de 256 Hz.
-2. **Remover línea base de época** — `pop\_rmbase`.
-3. **Canal de eventos** — Extrae eventos desde un canal con `pop\_chanevent`.
-4. **Seleccionar canales** — Retiene únicamente los 4 canales EEG (`eeg\_1` a `eeg\_4`).
-5. **Filtrado** — Filtro pasa-banda de 1–35 Hz con `pop\_eegfiltnew`.
-6. **Recorte temporal (opcional)** — El script incluye una sección comentada para recortar el registro a una ventana de tiempo específica (formato `MM:SS`). Descomentar y ajustar `tiempo\_inicio` y `tiempo\_fin` según sea necesario.
-7. **Limpieza de artefactos** — Artifact Subspace Reconstruction (ASR) con `pop\_clean\_rawdata` (burst criterion = 20, window criterion = 0.25).
-8. **Guardar** — Exporta el archivo `.set` procesado.
+1. **Import data** — Loads the `.csv` file with `pop\_musemonitor` at a sampling rate of 256 Hz.
+2. **Remove epoch baseline** — `pop\_rmbase`.
+3. **Event channel** — Extracts events from a channel with `pop\_chanevent`.
+4. **Select channels** — Retains only the 4 EEG channels (`eeg\_1` through `eeg\_4`).
+5. **Filtering** — 1–35 Hz bandpass filter with `pop\_eegfiltnew`.
+6. **Time trimming (optional)** — The script includes a commented-out section for trimming the recording to a specific time window (`MM:SS` format). Uncomment and adjust `tiempo\_inicio` and `tiempo\_fin` as needed.
+7. **Artifact cleaning** — Artifact Subspace Reconstruction (ASR) with `pop\_clean\_rawdata` (burst criterion = 20, window criterion = 0.25).
+8. **Save** — Exports the processed `.set` file.
 
-**Para usar el script:**
+**To use the script:**
 
-1. Abrir EEGLAB en MATLAB.
-2. Modificar las rutas en el script:
+1. Open EEGLAB in MATLAB.
+2. Modify the paths in the script:
 
-   * `cfg.dir` → carpeta de destino.
-   * Ruta del archivo `.csv` de entrada en `pop\_musemonitor`.
-   * Rutas de salida en `pop\_saveset` (nombre de archivo y directorio).
-3. Si es necesario recortar el registro, descomentar la sección "Cut Data" y definir los tiempos de inicio y fin.
-4. Ejecutar el script completo.
-5. Repetir para cada archivo de cada participante y tarea, actualizando las rutas y nombres de archivo correspondientes.
+   * `cfg.dir` → destination folder.
+   * Input `.csv` file path in `pop\_musemonitor`.
+   * Output paths in `pop\_saveset` (filename and directory).
+3. If you need to trim the recording, uncomment the "Cut Data" section and define the start and end times.
+4. Run the entire script.
+5. Repeat for each file of each participant and task, updating the corresponding paths and filenames.
 
-> \*\*Nota:\*\* El script debe ejecutarse archivo por archivo, modificando manualmente las rutas de entrada y salida para cada participante/tarea.
+> **Note:** The script must be run file by file, manually modifying the input and output paths for each participant/task.
 
-\---
+---
 
-### 2\. Preprocesamiento alternativo con `Script\_edf.m`
+### 2\. Alternative preprocessing with `Script\_edf.m`
 
-Este script se utiliza **exclusivamente cuando los archivos `.csv` presentan registros incompletos**. En este estudio, se aplicó únicamente para la tarea **Tiktok**, donde algunos participantes tenían archivos `.csv` truncados respecto a sus archivos `.edf`.
+This script is used **exclusively when `.csv` files contain incomplete recordings**. In this study, it was applied only for the **Tiktok** task, where some participants had truncated `.csv` files compared to their `.edf` files.
 
-**Diferencias respecto a `Script\_csv.m`:**
+**Differences from `Script\_csv.m`:**
 
-* Importa archivos `.edf` con `pop\_biosig` en lugar de `.csv`.
-* Requiere un paso de **resampleo a 256 Hz** (`pop\_resample`), ya que los `.edf` pueden tener una frecuencia de muestreo diferente.
-* Renombra los canales manualmente a `eeg\_1`–`eeg\_4`.
-* Aplica **re-referencia al promedio** de todos los canales (`pop\_reref`).
-* Utiliza un filtro Butterworth de orden 2 (1–35 Hz) a través de ERPLAB (`pop\_basicfilter`) en lugar de `pop\_eegfiltnew`.
+* Imports `.edf` files with `pop\_biosig` instead of `.csv`.
+* Requires a **resampling step to 256 Hz** (`pop\_resample`), since `.edf` files may have a different sampling rate.
+* Manually renames channels to `eeg\_1`–`eeg\_4`.
+* Applies **average re-referencing** across all channels (`pop\_reref`).
+* Uses a 2nd-order Butterworth filter (1–35 Hz) via ERPLAB (`pop\_basicfilter`) instead of `pop\_eegfiltnew`.
 
-**Para usar el script:**
+**To use the script:**
 
-1. Seguir los mismos pasos que con `Script\_csv.m`, pero apuntar a un archivo `.edf`.
-2. Utilizar este script solo si el archivo `.csv` del participante/tarea muestra datos incompletos.
+1. Follow the same steps as with `Script\_csv.m`, but point to an `.edf` file.
+2. Use this script only if the participant/task `.csv` file shows incomplete data.
 
-\---
+---
 
-### 3\. Extracción de datos espectrales con `Spectra.m`
+### 3\. Spectral data extraction with `Spectra.m`
 
-Una vez que todos los archivos `.set` estén procesados, se deben organizar en un archivo **STUDY** de EEGLAB para poder realizar el análisis espectral grupal.
+Once all `.set` files are processed, they must be organized into an EEGLAB **STUDY** file to perform group-level spectral analysis.
 
-**Requisitos previos:**
+**Prerequisites:**
 
-1. Tener todos los archivos `.set` en una carpeta común (e.g., `Datos Filtrados/All/`).
-2. Crear un archivo `.study` en EEGLAB (menú: `Study > Create a STUDY set`) definiendo participantes, condiciones/tareas y grupos.
-3. Pre-computar las medidas de canal: `Study > Precompute channel measures > Power Spectrum`.
+1. Have all `.set` files in a common folder (e.g., `Datos Filtrados/All/`).
+2. Create a `.study` file in EEGLAB (menu: `Study > Create a STUDY set`) defining participants, conditions/tasks, and groups.
+3. Pre-compute channel measures: `Study > Precompute channel measures > Power Spectrum`.
 
-**Funcionalidades del script:**
+**Script functionalities:**
 
-El script contiene varias secciones (separadas por `%%`) que exportan los datos espectrales en diferentes formatos:
+The script contains several sections (separated by `%%`) that export spectral data in different formats:
 
-|Sección|Salida|Descripción|
+| Section | Output | Description |
 |-|-|-|
-|1|`spectral\_data\_9\_tasks.csv`|Todas las frecuencias disponibles × 9 tareas (grupo)|
-|2|`spectral\_data\_1to20Hz.csv`|Frecuencias de 1–20 Hz con valores originales (grupo)|
-|3|`spectral\_data\_1to20Hz\_interpolated.csv`|Frecuencias enteras de 1–20 Hz interpoladas (grupo)|
-|4|`spectral\_data\_XX\_1to20Hz.csv`|Datos individuales por participante (1–20 Hz, interpolados)|
+| 1 | `spectral\_data\_9\_tasks.csv` | All available frequencies × 9 tasks (group) |
+| 2 | `spectral\_data\_1to20Hz.csv` | 1–20 Hz frequencies with original values (group) |
+| 3 | `spectral\_data\_1to20Hz\_interpolated.csv` | Integer frequencies from 1–20 Hz, interpolated (group) |
+| 4 | `spectral\_data\_XX\_1to20Hz.csv` | Individual per-participant data (1–20 Hz, interpolated) |
 
-El script funciona extrayendo los datos numéricos directamente desde las líneas de los gráficos generados por `std\_specplot`, ya que EEGLAB no ofrece una función directa para exportar estos valores.
+The script works by extracting numerical data directly from the plot lines generated by `std\_specplot`, since EEGLAB does not provide a built-in function to export these values directly.
 
-**Para usar el script:**
+**To use the script:**
 
-1. Cargar el STUDY desde EEGLAB o directamente con `pop\_loadstudy` en el script.
-2. Ajustar la ruta del archivo `.study` y la carpeta de datos.
-3. Ejecutar la sección deseada según el formato de salida necesario.
-4. Para la exportación individual (sección 4), verificar que el vector `participant\_ids` coincida con los IDs definidos en el STUDY.
+1. Load the STUDY from EEGLAB or directly with `pop\_loadstudy` in the script.
+2. Adjust the `.study` file path and data folder.
+3. Run the desired section depending on the output format needed.
+4. For individual export (section 4), verify that the `participant\_ids` vector matches the IDs defined in the STUDY.
 
-\---
+---
 
-### 4\. Análisis de ratios con `analisis\_ratio.R`
+### 4\. Ratio analysis with `analisis\_ratio.R`
 
-Este script en R calcula los ratios **Theta/Alpha** y **Alpha/Theta** a partir de los archivos CSV individuales generados por `Spectra.m`.
+This R script calculates **Theta/Alpha** and **Alpha/Theta** ratios from the individual CSV files generated by `Spectra.m`.
 
-**Bandas de frecuencia utilizadas:**
+**Frequency bands used:**
 
-* **Theta:** 4–8 Hz (filas 4 a 8 del CSV)
-* **Alpha:** 8–12 Hz (filas 8 a 12 del CSV)
+* **Theta:** 4–8 Hz (rows 4 to 8 of the CSV)
+* **Alpha:** 8–12 Hz (rows 8 to 12 of the CSV)
 
-**Salidas:**
+**Outputs:**
 
-* `mean\_band\_participants.csv` — Potencia media de Theta y Alpha por participante y tarea.
-* `ThetaAlpha\_ratios.csv` — Ratios T/A y A/T por participante y tarea.
+* `mean\_band\_participants.csv` — Mean Theta and Alpha power per participant and task.
+* `ThetaAlpha\_ratios.csv` — T/A and A/T ratios per participant and task.
 
-**Para usar el script:**
+**To use the script:**
 
-1. Colocar los archivos `spectral\_data\_XX\_1to20Hz.csv` en el directorio de trabajo de R.
-2. Verificar que el vector `participantes` coincida con los IDs de los sujetos.
-3. Ejecutar el script completo.
+1. Place the `spectral\_data\_XX\_1to20Hz.csv` files in the R working directory.
+2. Verify that the `participantes` vector matches the subject IDs.
+3. Run the entire script.
 
-\---
+---
 
-## Autor
+## Author
 
 Diego Garrido Cerpa — Viña del Mar, Chile
-
