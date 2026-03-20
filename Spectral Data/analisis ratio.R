@@ -2,60 +2,22 @@
 # Análisis ratio EEG MUSE
 ## Diego Garrido Cerpa - Viña del Mar
 
-# Cargar librería (opcional para manipulación)
-library(dplyr)
 
-# Leer el archivo
-s1 <- read.csv("spectral_data_s1_1to20Hz.csv", header = TRUE)
-
-# Verificar estructura
-head(s1)
-
-# Calcular promedios
-theta_mean <- s1 %>%
-  slice(4:8) %>%       # Filas 4 a 8 Hz (theta)
-  summarise(across(everything(), mean))
-
-alpha_mean <- s1 %>%
-  slice(8:12) %>%      # Filas 8 a 12 Hz (alpha)
-  summarise(across(everything(), mean))
-
-# Crear nuevo dataframe con dos filas: theta y alpha
-result <- rbind(
-  Theta = theta_mean,
-  Alpha = alpha_mean
-)
-
-# Mostrar resultado
-print(result)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Librerías
 library(dplyr)
 
 # Lista para guardar resultados
 resultados <- list()
 
+
+# Vector con los participantes que SÍ existen
+participantes <- c(1, 2, 3, 5, 6, 7, 8, 9)
+
 # Bucle para los 8 participantes
-for (i in 1:8) {
+for (i in participantes) {
   
   # Nombre de archivo
-  file_name <- paste0("spectral_data_s", i, "_1to20Hz.csv")
+  file_name <- paste0("spectral_data_", sprintf("%02d", i), "_1to20Hz.csv")
   
   # Leer el archivo
   df <- read.csv(file_name, header = TRUE)
@@ -101,7 +63,7 @@ write.csv(final_df, "mean_band_participants.csv", row.names = TRUE)
 ratio_df <- data.frame()
 
 # Iterar de 1 a 8 (participantes)
-for (i in 1:8) {
+for (i in participantes) {
   
   # Extraer las dos filas de este sujeto
   theta_row <- final_df[paste0("Theta_s", i), ]
